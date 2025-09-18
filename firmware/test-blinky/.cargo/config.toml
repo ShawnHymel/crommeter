@@ -1,0 +1,12 @@
+[build]
+target = "thumbv8m.main-none-eabihf"
+
+[target.thumbv8m.main-none-eabihf]
+rustflags = [
+  # Compiler optimizations
+  "-C", "target-cpu=cortex-m33",
+
+  # Linker directives
+  "-C", "link-arg=-Tlink.x",
+  "-C", "link-arg=--nmagic",
+]

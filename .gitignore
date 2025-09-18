@@ -1,0 +1,68 @@
+# Rust/Cargo
+**/target/
+Cargo.lock
+**/*.rs.bk
+*.pdb
+
+# IDE/Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Embedded development specific
+*.bin
+*.hex
+*.elf
+*.map
+*.lst
+*.o
+*.a
+*.so
+*.dylib
+*.dll
+
+# Debug files
+*.dSYM/
+*.su
+*.idb
+*.pdb
+
+# Backup files
+*.bak
+*.backup
+*.tmp
+
+# Local environment files
+.env
+.env.local
+
+# KiCad
+# Temporary files
+*.tmp
+*.bak
+*.bck
+*-bak
+*-cache.lib
+*-cache.dcm
+*.rescue-bak
+*.rescue-dcm
+*-rescue.lib
+fp-info-cache
+
+# Netlist files (usually auto-generated)
+*.net
+
+# Autorouter files (Freerouting)
+*.dsn
+*.ses
