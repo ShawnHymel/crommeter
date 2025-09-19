@@ -20,22 +20,34 @@
 use core::mem;
 
 use embassy_executor::Spawner;
+
 use embassy_rp::bind_interrupts;
+
 use embassy_rp::peripherals::PIO0;
-use embassy_rp::pio::Pio;
-use embassy_rp::pio_programs::i2s::{PioI2sIn, PioI2sInProgram};
 use embassy_rp::peripherals::USB;
-use embassy_rp::usb::{Driver, InterruptHandler};
+
+use embassy_rp::pio::InterruptHandler as PioInterruptHandler;
+use embassy_rp::pio::Pio;
+
+use embassy_rp::usb::Driver;
+use embassy_rp::usb::InterruptHandler as UsbInterruptHandler;
+
+// Custom I2S input
+// mod i2s_in;
+// use i2s_in::{PioI2sIn, PioI2sInProgram};
+
+use embassy_rp::pio_programs::i2s::{PioI2sIn, PioI2sInProgram};
 
 use static_cell::StaticCell;
 
 use panic_probe as _;
 
+// Settings
+const LOG_LEVEL: log::LevelFilter = log::LevelFilter::Debug;
 const SAMPLE_RATE: u32 = 48_000;
 const BIT_DEPTH: u32 = 16;
 const CHANNELS: u32 = 2;
-const USE_ONBOARD_PULLDOWN: bool = false; // whether or not to use the onboard pull-down resistor,
-                                          // which has documented issues on many RP235x boards
+const USE_ONBOARD_PULLDOWN: bool = false;
 
 // Bind PIO interrupt handler
 bind_interrupts!(struct PioIrqs {
@@ -50,24 +62,27 @@ bind_interrupts!(struct UsbIrqs {
 // Task: handle USB logging
 #[embassy_executor::task]
 async fn logger_task(driver: Driver<'static, USB>) {
-    embassy_usb_logger::run!(1024, log::LevelFilter::Debug, driver);
+    embassy_usb_logger::run!(1024, LOG_LEVEL, driver);
 }
 
 #[embassy_executor::main]
-async fn main(_spawner: Spawner) {
+async fn main(spawner: Spawner) {
+    // Initialize embassy HAL
     let p = embassy_rp::init(Default::default());
 
     // Initialize USB driver and task
     let usb_driver = Driver::new(p.USB, UsbIrqs);
-    let _ = spawner.spawn(logger_task(usb_driver));
+    let _ = spawner.spawn(logger_task(usb_driver).unwrap());
 
     // Setup pio state machine for i2s input
     let Pio { mut common, sm0, .. } = Pio::new(p.PIO0, PioIrqs);
 
+    // Configure I2S pins
     let bit_clock_pin = p.PIN_18;
-    let left_right_clock_pin = p.PIN_19;
+    let left_right_clock_pin = p.PIN_19; // AKA "WS (word select)"
     let data_pin = p.PIN_20;
 
+    // Initialize PIO I2S program
     let program = PioI2sInProgram::new(&mut common);
     let mut i2s = PioI2sIn::new(
         &mut common,

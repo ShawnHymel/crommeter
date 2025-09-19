@@ -4,12 +4,14 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-embassy-executor = { version = "0.9.0", features = ["arch-cortex-m", "executor-thread"] }
-embassy-futures = "0.1.2"
-embassy-time = "0.5.0"
-embassy-rp = { version = "0.8.0", features = ["time-driver", "critical-section-impl", "rp235xa"] }
-embassy-usb = "0.5.1"
-embassy-usb-logger = "0.5.1"
+# PIO I2S input functionality is brand new, so pin some crates to a recent Git commit
+embassy-executor = { git = "https://github.com/embassy-rs/embassy.git", rev = "dd10e372d2e656dc71fa460564d405ba6a5b5d4b", features = ["arch-cortex-m", "executor-thread"] }
+embassy-futures = { git = "https://github.com/embassy-rs/embassy.git", rev = "dd10e372d2e656dc71fa460564d405ba6a5b5d4b" }
+embassy-time = { git = "https://github.com/embassy-rs/embassy.git", rev = "dd10e372d2e656dc71fa460564d405ba6a5b5d4b" }
+embassy-rp = { git = "https://github.com/embassy-rs/embassy.git", rev = "dd10e372d2e656dc71fa460564d405ba6a5b5d4b", features = ["time-driver", "critical-section-impl", "rp235xa"] }
+embassy-sync = { git = "https://github.com/embassy-rs/embassy.git", rev = "dd10e372d2e656dc71fa460564d405ba6a5b5d4b" }
+embassy-usb = { git = "https://github.com/embassy-rs/embassy.git", rev = "dd10e372d2e656dc71fa460564d405ba6a5b5d4b" }
+embassy-usb-logger = { git = "https://github.com/embassy-rs/embassy.git", rev = "dd10e372d2e656dc71fa460564d405ba6a5b5d4b" }
 
 log = "0.4"
 
@@ -19,6 +21,8 @@ cortex-m-rt = "0.7.5"
 panic-probe = { version = "1.0.0" }
 
 static_cell = "2.1"
+
+fixed = "1.29.0"
 
 [profile.dev]
 
