@@ -1,28 +1,14 @@
-//! This example shows receiving audio from a connected I2S microphone (or other audio source)
-//! using the PIO module of the RP235x.
-//!
-//!
-//! Connect the i2s microphone as follows:
-//!   bclk : GPIO 18
-//!   lrc  : GPIO 19
-//!   din  : GPIO 20
-//! Then hold down the boot select button to begin receiving audio. Received I2S words will be written to
-//! buffers for the left and right channels for use in your application, whether that's storage or
-//! further processing
-//!
-//!  Note the const USE_ONBOARD_PULLDOWN is by default set to false, meaning an external
-//!  pull-down resistor is being used on the data pin if required by the mic being used.
-//! 
-//! From: https://github.com/embassy-rs/embassy/blob/main/examples/rp235x/src/bin/pio_i2s_rx.rs   
+//! Simplest solution - just signal when buffer is ready
 
 #![no_std]
 #![no_main]
 
 use core::mem;
-
 use embassy_executor::Spawner;
-
+use embassy_sync::signal::Signal;
+use embassy_sync::blocking_mutex::raw::CriticalSectionRawMutex;
 use embassy_rp::bind_interrupts;
+use embassy_rp::gpio;
 use embassy_rp::peripherals::PIO0;
 use embassy_rp::peripherals::USB;
 use embassy_rp::pio::InterruptHandler as PioInterruptHandler;
@@ -30,9 +16,7 @@ use embassy_rp::pio::Pio;
 use embassy_rp::pio_programs::i2s::{PioI2sIn, PioI2sInProgram};
 use embassy_rp::usb::Driver;
 use embassy_rp::usb::InterruptHandler as UsbInterruptHandler;
-
 use static_cell::StaticCell;
-
 use panic_probe as _;
 
 // Settings
@@ -41,17 +25,17 @@ const SAMPLE_RATE: u32 = 48_000;
 const BIT_DEPTH: u32 = 16;
 const CHANNELS: u32 = 2;
 const USE_ONBOARD_PULLDOWN: bool = false;
-const BUFFER_SIZE: usize = 1024;
+const BUFFER_SIZE: usize = 2048;
 
 // Globals
 static DMA_BUFFER: StaticCell<[u32; BUFFER_SIZE * 2]> = StaticCell::new();
+static BUFFER_READY: Signal<CriticalSectionRawMutex, ()> = Signal::new();
 
-// Bind PIO interrupt handler
+// Bind interrupts
 bind_interrupts!(struct PioIrqs {
     PIO0_IRQ_0 => PioInterruptHandler<PIO0>;
 });
 
-// Bind USB interrupt handler
 bind_interrupts!(struct UsbIrqs {
     USBCTRL_IRQ => UsbInterruptHandler<USB>;
 });
@@ -62,19 +46,35 @@ async fn logger_task(driver: Driver<'static, USB>) {
     embassy_usb_logger::run!(1024, LOG_LEVEL, driver);
 }
 
-// Async function to handle audio buffer half when ready
-async fn handle_audio_buffer(buf: &[u32]) {
-    log::debug!("{:?}", &buf[0..100]);
+// Task: handle audio processing - just blink LED when buffer ready
+#[embassy_executor::task]
+async fn audio_processor_task(mut led_pin: gpio::Output<'static>) {
+    loop {
+        BUFFER_READY.wait().await;
+        
+        // Toggle LED to show a buffer was processed
+        led_pin.toggle();
+        
+        // Add any other processing here
+        // The actual audio data is in the global DMA_BUFFER if you need it
+        
+        // TODO: figure out how to get the global buffer
+    }
 }
 
 #[embassy_executor::main]
 async fn main(spawner: Spawner) {
-    // Initialize embassy HAL
     let p = embassy_rp::init(Default::default());
 
     // Initialize USB driver and task
     let usb_driver = Driver::new(p.USB, UsbIrqs);
-    let _ = spawner.spawn(logger_task(usb_driver).unwrap());
+    spawner.spawn(logger_task(usb_driver).expect("Failed to spawn logger task"));
+
+    // Initialize LED
+    let led_pin = gpio::Output::new(p.PIN_15, gpio::Level::Low);
+
+    // Spawn audio processing task
+    spawner.spawn(audio_processor_task(led_pin).expect("Failed to spawn audio processor task"));
 
     // Initialize the audio buffer
     let dma_buffer = DMA_BUFFER.init_with(|| [0u32; BUFFER_SIZE * 2]);
@@ -85,7 +85,7 @@ async fn main(spawner: Spawner) {
 
     // Configure I2S pins
     let bit_clock_pin = p.PIN_18;
-    let left_right_clock_pin = p.PIN_19; // AKA "WS (word select)"
+    let left_right_clock_pin = p.PIN_19;
     let data_pin = p.PIN_20;
 
     // Initialize PIO I2S program
@@ -105,21 +105,11 @@ async fn main(spawner: Spawner) {
     );
 
     loop {
-        // Start DMA read into buffer_a
-        let dma_future = i2s.read(buffer_a);
+        // Minimal I2S loop - just read and signal
+        i2s.read(buffer_a).await;
         
-        // Process buffer_b using raw pointer to avoid borrow checker
-        let buffer_b_ptr = buffer_b.as_ptr();
-        let buffer_b_len = buffer_b.len();
-        let process_future = async {
-            unsafe {
-                let slice = core::slice::from_raw_parts(buffer_b_ptr, buffer_b_len);
-                handle_audio_buffer(slice).await;
-            }
-        };
-        
-        // Use join to wait for both - this consumes both futures
-        embassy_futures::join::join(dma_future, process_future).await;
+        // Signal that a buffer is ready (very fast - no data copying)
+        BUFFER_READY.signal(());
         
         // Swap buffers for next iteration
         mem::swap(&mut buffer_a, &mut buffer_b);
