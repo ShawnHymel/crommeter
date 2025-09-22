@@ -66,3 +66,6 @@ fp-info-cache
 # Autorouter files (Freerouting)
 *.dsn
 *.ses
+
+# KiCad backups
+crommeter-backups/

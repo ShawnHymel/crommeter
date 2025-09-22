@@ -1,0 +1,13 @@
+(fp_lib_table
+  (version 7)
+  (lib (name "RP2xxx_Stamp")(type "KiCad")(uri "D:/Projects/GitHub/crommeter/hardware/libraries/rp2350-stamp/RP2xxx_Stamp.pretty")(options "")(descr ""))
+  (lib (name "S2B-PH-SM4-TB")(type "KiCad")(uri "D:/Projects/GitHub/crommeter/hardware/libraries/S2B_PH_SM4_TB/S2B-PH-SM4-TB.pretty")(options "")(descr ""))
+  (lib (name "10118194_0001LF")(type "KiCad")(uri "D:/Projects/GitHub/crommeter/hardware/libraries/10118194_0001LF/10118194_0001LF.pretty")(options "")(descr ""))
+  (lib (name "ics-43434")(type "KiCad")(uri "D:/Projects/GitHub/crommeter/hardware/libraries/ics-43434/footprints.pretty")(options "")(descr ""))
+  (lib (name "FSM2JSMAATR")(type "KiCad")(uri "D:/Projects/GitHub/crommeter/hardware/libraries/FSM2JSMAATR/footprints.pretty")(options "")(descr ""))
+  (lib (name "custom")(type "KiCad")(uri "D:/Projects/GitHub/crommeter/hardware/libraries/custom/custom.pretty")(options "")(descr ""))
+  (lib (name "BSD840NH6327XTSA1")(type "KiCad")(uri "D:/Projects/GitHub/crommeter/hardware/libraries/BSD840NH6327XTSA1/BSD840NH6327XTSA1.pretty")(options "")(descr ""))
+  (lib (name "CUW_Y3SH_B2_GFJD_5J6T_Z242_20_R18_Z")(type "KiCad")(uri "D:/Projects/GitHub/crommeter/hardware/libraries/CUW_Y3SH_B2_GFJD_5J6T_Z242_20_R18_Z/CUW_Y3SH_B2_GFJD_5J6T_Z242_20_R18_Z.pretty")(options "")(descr ""))
+  (lib (name "badgelife_sao_v169bis")(type "KiCad")(uri "D:/Projects/GitHub/crommeter/hardware/libraries/Badgelife_SAO_v169bis_20190321-0053/badgelife_sao_v169bis.pretty")(options "")(descr ""))
+  (lib (name "qwiic_connector")(type "KiCad")(uri "D:/Projects/GitHub/crommeter/hardware/libraries/qwiic_connector/qwiic_connector.pretty")(options "")(descr ""))
+)
