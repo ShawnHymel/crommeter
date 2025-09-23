@@ -10,4 +10,5 @@
   (lib (name "CUW_Y3SH.B2-GFJD-5J6T-Z242-20-R18-Z")(type "KiCad")(uri "D:/Projects/GitHub/crommeter/hardware/libraries/CUW_Y3SH_B2_GFJD_5J6T_Z242_20_R18_Z/CUW_Y3SH.B2-GFJD-5J6T-Z242-20-R18-Z.kicad_sym")(options "")(descr ""))
   (lib (name "badgelife_shitty_addon_v169bis")(type "Legacy")(uri "D:/Projects/GitHub/crommeter/hardware/libraries/Badgelife_SAO_v169bis_20190321-0053/badgelife_shitty_addon_v169bis.lib")(options "")(descr ""))
   (lib (name "qwiic_connector")(type "KiCad")(uri "D:/Projects/GitHub/crommeter/hardware/libraries/qwiic_connector/qwiic_connector.kicad_sym")(options "")(descr ""))
+  (lib (name "10129380-903001BLF")(type "KiCad")(uri "D:/Projects/GitHub/crommeter/hardware/libraries/10129380_903001BLF/10129380-903001BLF.kicad_sym")(options "")(descr ""))
 )
