@@ -11,4 +11,5 @@
   (lib (name "badgelife_sao_v169bis")(type "KiCad")(uri "D:/Projects/GitHub/crommeter/hardware/libraries/Badgelife_SAO_v169bis_20190321-0053/badgelife_sao_v169bis.pretty")(options "")(descr ""))
   (lib (name "qwiic_connector")(type "KiCad")(uri "D:/Projects/GitHub/crommeter/hardware/libraries/qwiic_connector/qwiic_connector.pretty")(options "")(descr ""))
   (lib (name "10129380-903001BLF")(type "KiCad")(uri "D:/Projects/GitHub/crommeter/hardware/libraries/10129380_903001BLF/10129380-903001BLF.pretty")(options "")(descr ""))
+  (lib (name "artwork")(type "KiCad")(uri "D:/Projects/GitHub/crommeter/hardware/libraries/artwork.pretty")(options "")(descr ""))
 )
