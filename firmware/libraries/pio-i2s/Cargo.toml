@@ -1,0 +1,12 @@
+[package]
+name = "pio-i2s"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+embassy-time = { git = "https://github.com/embassy-rs/embassy.git", rev = "dd10e372d2e656dc71fa460564d405ba6a5b5d4b" }
+embassy-rp = { git = "https://github.com/embassy-rs/embassy.git", rev = "dd10e372d2e656dc71fa460564d405ba6a5b5d4b", features = ["time-driver"] }
+
+pio = "0.3"
+pio-proc = "0.3"
+fixed = "1.23.1"

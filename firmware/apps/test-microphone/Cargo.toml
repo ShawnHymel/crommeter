@@ -13,6 +13,9 @@ embassy-sync = { git = "https://github.com/embassy-rs/embassy.git", rev = "dd10e
 embassy-usb = { git = "https://github.com/embassy-rs/embassy.git", rev = "dd10e372d2e656dc71fa460564d405ba6a5b5d4b" }
 embassy-usb-logger = { git = "https://github.com/embassy-rs/embassy.git", rev = "dd10e372d2e656dc71fa460564d405ba6a5b5d4b" }
 
+# Modified PIO I2C program
+pio-i2s = { path = "../../libraries/pio-i2s" }
+
 log = "0.4"
 
 cortex-m = "0.7.7"

@@ -4,25 +4,30 @@
 #![no_main]
 
 use core::mem;
+
 use embassy_executor::Spawner;
+
 use embassy_sync::signal::Signal;
 use embassy_sync::blocking_mutex::raw::CriticalSectionRawMutex;
+
 use embassy_rp::bind_interrupts;
 use embassy_rp::gpio;
 use embassy_rp::peripherals::PIO0;
 use embassy_rp::peripherals::USB;
-use embassy_rp::pio::InterruptHandler as PioInterruptHandler;
 use embassy_rp::pio::Pio;
-use embassy_rp::pio_programs::i2s::{PioI2sIn, PioI2sInProgram};
+use embassy_rp::pio::InterruptHandler as PioInterruptHandler;
 use embassy_rp::usb::Driver;
 use embassy_rp::usb::InterruptHandler as UsbInterruptHandler;
+
+use pio_i2s::{PioI2sIn, PioI2sInProgram};
+
 use static_cell::StaticCell;
 use panic_probe as _;
 
 // Settings
 const LOG_LEVEL: log::LevelFilter = log::LevelFilter::Debug;
 const SAMPLE_RATE: u32 = 48_000;
-const BIT_DEPTH: u32 = 16;
+const BIT_DEPTH: u32 = 32;
 const CHANNELS: u32 = 2;
 const USE_ONBOARD_PULLDOWN: bool = false;
 const BUFFER_SIZE: usize = 2048;
@@ -99,7 +104,7 @@ async fn main(spawner: Spawner) {
         bit_clock_pin,
         left_right_clock_pin,
         SAMPLE_RATE,
-        BIT_DEPTH,
+        // BIT_DEPTH,
         CHANNELS,
         &program,
     );
