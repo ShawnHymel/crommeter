@@ -27,14 +27,12 @@ use panic_probe as _;
 // Settings
 const LOG_LEVEL: log::LevelFilter = log::LevelFilter::Debug;
 const SAMPLE_RATE: u32 = 48_000;
-const BIT_DEPTH: u32 = 32;
 const CHANNELS: u32 = 2;
 const USE_ONBOARD_PULLDOWN: bool = false;
-const BUFFER_SIZE: usize = 2048;
 
-// Globals
-static DMA_BUFFER: StaticCell<[u32; BUFFER_SIZE * 2]> = StaticCell::new();
-static BUFFER_READY: Signal<CriticalSectionRawMutex, ()> = Signal::new();
+// Circular buffer - MUST be power of 2!
+const CIRCULAR_BUFFER_SIZE: usize = 1024;
+static CIRCULAR_BUFFER: StaticCell<[u32; CIRCULAR_BUFFER_SIZE]> = StaticCell::new();
 
 // Bind interrupts
 bind_interrupts!(struct PioIrqs {
@@ -51,22 +49,6 @@ async fn logger_task(driver: Driver<'static, USB>) {
     embassy_usb_logger::run!(1024, LOG_LEVEL, driver);
 }
 
-// Task: handle audio processing - just blink LED when buffer ready
-#[embassy_executor::task]
-async fn audio_processor_task(mut led_pin: gpio::Output<'static>) {
-    loop {
-        BUFFER_READY.wait().await;
-        
-        // Toggle LED to show a buffer was processed
-        led_pin.toggle();
-        
-        // Add any other processing here
-        // The actual audio data is in the global DMA_BUFFER if you need it
-        
-        // TODO: figure out how to get the global buffer
-    }
-}
-
 #[embassy_executor::main]
 async fn main(spawner: Spawner) {
     let p = embassy_rp::init(Default::default());
@@ -76,14 +58,7 @@ async fn main(spawner: Spawner) {
     spawner.spawn(logger_task(usb_driver).expect("Failed to spawn logger task"));
 
     // Initialize LED
-    let led_pin = gpio::Output::new(p.PIN_15, gpio::Level::Low);
-
-    // Spawn audio processing task
-    spawner.spawn(audio_processor_task(led_pin).expect("Failed to spawn audio processor task"));
-
-    // Initialize the audio buffer
-    let dma_buffer = DMA_BUFFER.init_with(|| [0u32; BUFFER_SIZE * 2]);
-    let (mut buffer_a, mut buffer_b) = dma_buffer.split_at_mut(BUFFER_SIZE);
+    let mut led_pin = gpio::Output::new(p.PIN_15, gpio::Level::Low);
 
     // Setup pio state machine for i2s input
     let Pio { mut common, sm0, .. } = Pio::new(p.PIO0, PioIrqs);
@@ -109,14 +84,25 @@ async fn main(spawner: Spawner) {
         &program,
     );
 
+    // TEST: let serial connect
+    embassy_time::Timer::after_secs(5).await;
+
+    // Test: Get DMA channel
+    let ch = i2s.dma_channel();
+    log::info!("DMA channel: {}", ch);
+
+    // Test: Initialize circular buffer
+    let circular_buf = CIRCULAR_BUFFER.init([0u32; CIRCULAR_BUFFER_SIZE]);
+    
+    // Test: Call start_circular (should just log messages)
+    log::info!("Calling start_circular...");
+    unsafe {
+        i2s.start_circular(circular_buf);
+    }
+    log::info!("start_circular completed!");
+
+    // Done
     loop {
-        // Minimal I2S loop - just read and signal
-        i2s.read(buffer_a).await;
-        
-        // Signal that a buffer is ready (very fast - no data copying)
-        BUFFER_READY.signal(());
-        
-        // Swap buffers for next iteration
-        mem::swap(&mut buffer_a, &mut buffer_b);
+        embassy_time::Timer::after_secs(10).await;
     }
 }
